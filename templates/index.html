@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🌐 Language Translator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #2c3e50;
+      --card: #f8f9fa;
+    }
+
+    body.dark {
+      --bg: #1e1e2f;
+      --text: #f1f1f1;
+      --card: #2e2e40;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Fira Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 650px;
+      background: var(--card);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+    }
+
+    textarea, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    textarea { height: 100px; resize: vertical; }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button.translate-btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button.translate-btn:hover {
+      background: #2980b9;
+    }
+
+    .result {
+      margin-top: 20px;
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 15px;
+    }
+
+    .error { color: red; }
+
+    .mic-btn, .dark-mode-toggle {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .lang-pair {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .swap-btn {
+      padding: 10px;
+      background: #eee;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌐 Language Translator</h1>
+
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓 Toggle Dark Mode</button>
+
+    <textarea id="textInput" placeholder="Enter or speak your text..."></textarea>
+    <button class="mic-btn" onclick="startSpeech()"><i class="fas fa-microphone"></i>🎙 Speak</button>
+
+    <div class="lang-pair">
+      <select id="sourceLang">
+  <option value="auto">🌐 Detect Language</option>
+  <option value="en">🇬🇧 English</option>
+  <option value="hi">🇮🇳 Hindi</option>
+  <option value="ja">🇯🇵 Japanese</option>
+  <option value="fr">🇫🇷 French</option>
+  <option value="es">🇪🇸 Spanish</option>
+  <option value="de">🇩🇪 German</option>
+  <option value="zh-CN">🇨🇳 Chinese</option>
+  <option value="ru">🇷🇺 Russian</option>
+  <option value="it">🇮🇹 Italian</option>
+  <option value="ko">🇰🇷 Korean</option>
+  <option value="pt">🇵🇹 Portuguese</option>
+  <option value="uk">🇺🇦 Ukrainian</option>
+  <option value="ar">🇸🇦 Arabic</option>
+</select>
+
+
+      <button onclick="swapLanguages()" class="bg-gray-100 px-3 py-2 rounded hover:bg-gray-200 transition">
+        🔁
+      </button>
+
+      <select id="targetLang">
+  <option value="en">🇬🇧 English</option>
+  <option value="hi">🇮🇳 Hindi</option>
+  <option value="ja">🇯🇵 Japanese</option>
+  <option value="fr">🇫🇷 French</option>
+  <option value="es">🇪🇸 Spanish</option>
+  <option value="de">🇩🇪 German</option>
+  <option value="zh-CN">🇨🇳 Chinese</option>
+  <option value="ru">🇷🇺 Russian</option>
+  <option value="it">🇮🇹 Italian</option>
+  <option value="ko">🇰🇷 Korean</option>
+  <option value="pt">🇵🇹 Portuguese</option>
+  <option value="uk">🇺🇦 Ukrainian</option>
+  <option value="ar">🇸🇦 Arabic</option>
+</select>
+
+    </div>
+
+    <button class="translate-btn" onclick="translateText()">🌐 Translate</button>
+
+    <div id="result" class="result"><p>Translation will appear here...</p></div>
+  </div>
+
+  <script>
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function swapLanguages() {
+      const source = document.getElementById('sourceLang');
+      const target = document.getElementById('targetLang');
+      [source.value, target.value] = [target.value, source.value];
+    }
+
+    function translateText() {
+      const text = document.getElementById('textInput').value;
+      const sourceLang = document.getElementById('sourceLang').value;
+      const targetLang = document.getElementById('targetLang').value;
+      const resultDiv = document.getElementById('result');
+
+      if (!text.trim()) {
+        resultDiv.innerHTML = '<p class="error">Please enter some text.</p>';
+        return;
+      }
+
+      resultDiv.innerHTML = '<p>Translating...</p>';
+
+      fetch('/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `text=${encodeURIComponent(text)}&source_lang=${sourceLang}&target_lang=${targetLang}`
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          resultDiv.innerHTML = `<p class="error">${data.error}</p>`;
+        } else {
+          resultDiv.innerHTML = `
+            <p><strong>Original (${data.source_lang.toUpperCase()}):</strong> ${data.input_text}</p>
+            <p><strong>Translated (${data.target_lang.toUpperCase()}):</strong> ${data.translated_text}</p>
+            <audio controls autoplay>
+              <source src="${data.audio_url}" type="audio/wav">
+              Your browser does not support audio.
+            </audio>`;
+        }
+      });
+    }
+
+    function startSpeech() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'auto';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        document.getElementById('textInput').value = event.results[0][0].transcript;
+      };
+
+      recognition.onerror = function(event) {
+        alert('Speech recognition error: ' + event.error);
+      };
+    }
+  </script>
+</body>
+</html>
