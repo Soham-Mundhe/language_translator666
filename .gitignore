@@ -1,1 +1,30 @@
-venv\
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Generated temporary audio files
+static/audio/*.mp3
+static/*.mp3
+!static/audio/.gitkeep
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
