@@ -12,3 +12,4 @@ from app import app
 # Vercel automatically exposes the WSGI 'app' object
 if __name__ == "__main__":
     app.run()
+
