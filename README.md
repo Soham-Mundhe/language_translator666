@@ -58,7 +58,16 @@ Open your browser and navigate to `http://127.0.0.1:5000`.
 
 ## 🚢 Deployment Guide
 
-### Option 1: Deploy on Render (Recommended - Free Tier)
+### Option 1: Deploy on Vercel (One-Click Serverless)
+1. Fork or push this repository to GitHub.
+2. Sign in to [Vercel](https://vercel.com) and click **Add New...** -> **Project**.
+3. Import your `language_translator666` repository.
+4. Vercel automatically detects `vercel.json` and `api/index.py`. Click **Deploy**.
+5. Your application is instantly live with zero configuration!
+
+---
+
+### Option 2: Deploy on Render (Recommended - Free Tier)
 1. Fork or push this repository to GitHub.
 2. Sign in to [Render](https://render.com) and click **New +** -> **Web Service**.
 3. Connect your GitHub repository.
@@ -70,7 +79,7 @@ Open your browser and navigate to `http://127.0.0.1:5000`.
 
 ---
 
-### Option 2: Deploy on Railway
+### Option 3: Deploy on Railway
 1. Sign in to [Railway](https://railway.app).
 2. Click **New Project** -> **Deploy from GitHub repo**.
 3. Select this repository.
@@ -78,7 +87,7 @@ Open your browser and navigate to `http://127.0.0.1:5000`.
 
 ---
 
-### Option 3: Deploy with Docker
+### Option 4: Deploy with Docker
 1. Build the Docker image:
 ```bash
 docker build -t language-translator .
@@ -91,7 +100,7 @@ docker run -p 5000:5000 language-translator
 
 ---
 
-### Option 4: Deploy on Heroku
+### Option 5: Deploy on Heroku
 ```bash
 heroku create my-language-translator
 git push heroku main
@@ -102,6 +111,9 @@ git push heroku main
 ## 📂 Project Structure
 
 ```text
+├── api/
+│   └── index.py        # Vercel Serverless Function entry point
+├── vercel.json         # Vercel routing and rewrite configuration
 ├── app.py              # Main Flask application & translation logic
 ├── requirements.txt    # Production dependencies
 ├── Procfile            # Deployment start command for Render / Heroku / Railway

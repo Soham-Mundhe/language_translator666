@@ -748,7 +748,9 @@
           // Handle Audio
           if (data.audio_url) {
             const audioSrc = document.getElementById('audioSource');
-            audioSrc.src = data.audio_url + '?t=' + Date.now();
+            audioSrc.src = data.audio_url.startsWith('data:')
+              ? data.audio_url
+              : data.audio_url + '?t=' + Date.now();
             audioPlayer.load();
             audioContainer.style.display = 'flex';
           } else {

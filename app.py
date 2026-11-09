@@ -2,18 +2,28 @@ import os
 import time
 import uuid
 import logging
+import io
+import base64
 import requests
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from gtts import gTTS
 
-app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 # Base directory for reliable cross-platform path resolution
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 VOICE_FOLDER = os.path.join(BASE_DIR, "static", "audio")
-os.makedirs(VOICE_FOLDER, exist_ok=True)
+
+try:
+    os.makedirs(VOICE_FOLDER, exist_ok=True)
+except OSError:
+    pass
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static"),
+)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def cleanup_old_audio_files(folder, max_age_seconds=1800):
@@ -104,7 +114,7 @@ def home():
 
 @app.route("/health")
 def health():
-    """Health check endpoint for deployment monitoring (Render, Railway, AWS, Docker)."""
+    """Health check endpoint for deployment monitoring (Render, Railway, Vercel, AWS, Docker)."""
     return jsonify({"status": "healthy", "service": "language_translator"}), 200
 
 
@@ -141,15 +151,24 @@ def translate():
         # Generate audio TTS if possible (graceful fallback if TTS fails)
         audio_url = None
         try:
-            cleanup_old_audio_files(VOICE_FOLDER, max_age_seconds=1800)
             # Limit TTS text to first 500 characters to prevent timeouts on large inputs
             tts_text = translated[:500].strip()
             if tts_text:
                 tts = gTTS(text=tts_text, lang=target_lang)
-                filename = f"{uuid.uuid4().hex}.mp3"
-                filepath = os.path.join(VOICE_FOLDER, filename)
-                tts.save(filepath)
-                audio_url = f"/static/audio/{filename}"
+                # In serverless environments (Vercel) or read-only filesystems,
+                # generate audio in-memory as a Base64 data URL
+                try:
+                    fp = io.BytesIO()
+                    tts.write_to_fp(fp)
+                    fp.seek(0)
+                    b64_audio = base64.b64encode(fp.read()).decode("utf-8")
+                    audio_url = f"data:audio/mp3;base64,{b64_audio}"
+                except Exception as mem_err:
+                    cleanup_old_audio_files(VOICE_FOLDER, max_age_seconds=1800)
+                    filename = f"{uuid.uuid4().hex}.mp3"
+                    filepath = os.path.join(VOICE_FOLDER, filename)
+                    tts.save(filepath)
+                    audio_url = f"/static/audio/{filename}"
         except Exception as tts_err:
             logger.info(f"gTTS audio generation skipped or unavailable: {tts_err}")
             audio_url = None
